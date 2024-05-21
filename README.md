@@ -1,5 +1,6 @@
-https://nf-sycdn.kuwo.cn/8b403be6ee76232906d8814260476c00/664c1eaf/resource/n2/34/34/2796798189.mp3?from=vip
-https://pypi.tuna.tsinghua.edu.cn/simple/
+# https://nf-sycdn.kuwo.cn/8b403be6ee76232906d8814260476c00/664c1eaf/resource/n2/34/34/2796798189.mp3?from=vip
+# https://pypi.tuna.tsinghua.edu.cn/simple/
+# https://stackoverflow.com/questions/4409502/directory-transfers-with-paramiko
 
 # Whisper
 
