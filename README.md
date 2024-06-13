@@ -4,6 +4,16 @@ https://pypi.tuna.tsinghua.edu.cn/simple/
 
 https://stackoverflow.com/questions/4409502/directory-transfers-with-paramiko
 
+下载地址：CANN 7.0.1.1 CANN-Toolkit 
+
+    - 下载：Ascend-cann-toolkit_7.0.1.1_linux-aarch64.run (https://support.huawei.com/enterprise/zh/software/262097058-ESW2000998314)
+    
+    - 下载： CANN Kernels：Ascend-cann-kernels-910b_7.0.1.1_linux.run (https://support.huawei.com/enterprise/zh/software/262097058-ESW2000998337)
+    
+    - 下载：torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl （https://gitee.com/ascend/pytorch/releases/download/v5.0.1.1-pytorch2.1.0/torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl）
+
+
+将这三个下载的文件放在 /mnt/remote/whisper/ 目录下，稍后会需要挂载到容器中使用。
 
 # Whisper
 
