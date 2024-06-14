@@ -73,3 +73,21 @@ docker run -itd -u root \
 -v /mnt/remote:/mnt/remote \
 ubuntu:whisper /bin/bash
 
+
+
+#进入容器：
+ 
+docker exec -it whisper /bin/bash
+
+#执行下面的命令配置环境变量：
+ 
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+export LD_LIBRARY_PATH=/usr/local/Ascend/driver/lib64/driver/:$LD_LIBRARY_PATH
+source /root/miniconda3/bin/activate
+
+# 到这里，Whisper 的运行环境已经就绪，可以使用挂载进来的 /mnt/remote/whisper 目录下的 Whisper 模型权重进行推理。
+
+
+
+
+
