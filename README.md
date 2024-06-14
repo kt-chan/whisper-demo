@@ -43,11 +43,11 @@ RUN /mnt/remote/whisper/Ascend-cann-kernels-910b_7.0.1.1_linux.run --quiet --ins
 
 #安装 PyTorch 2.1.0 和配套的 PyTorch Adapter（torch_npu）:
  
-pip install torch==2.1.0
+pip install torch==2.1.0 -i https://mirrors.aliyun.com/pypi/simple/
 
 pip install torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
 
 #安装 Whipser 依赖的包： 
 
-pip install decorator attrs psutil absl-py cloudpickle scipy synr==0.5.0 tornado numpy pandas sentencepiece accelerate transformers==4.37.0 datasets
+pip install decorator attrs psutil absl-py cloudpickle scipy synr==0.5.0 tornado numpy pandas sentencepiece accelerate transformers==4.37.0 datasets -i https://mirrors.aliyun.com/pypi/simple/
 
