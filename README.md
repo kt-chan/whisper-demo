@@ -51,3 +51,23 @@ pip install torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux20
 
 pip install decorator attrs psutil absl-py cloudpickle scipy synr==0.5.0 tornado numpy pandas sentencepiece accelerate transformers==4.37.0 datasets -i https://mirrors.aliyun.com/pypi/simple/
 
+
+
+# Execution
+
+docker run -itd -u root \
+--ipc=host --network=host --name whisper \
+--device=/dev/davinci0 \
+--device=/dev/davinci_manager \
+--device=/dev/devmm_svm \
+--device=/dev/hisi_hdc \
+-v /usr/local/bin/npu-smi:/usr/local/bin/npu-smi \
+-v /usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64/common \
+-v /usr/local/Ascend/driver/lib64/driver:/usr/local/Ascend/driver/lib64/driver \
+-v /etc/ascend_install.info:/etc/ascend_install.info \
+-v /etc/vnpu.cfg:/etc/vnpu.cfg \
+-v /usr/local/Ascend/driver/version.info:/usr/local/Ascend/driver/version.info \
+-v /usr/local/Ascend/driver/tools:/usr/local/Ascend/driver/tools \
+-v /mnt/remote:/mnt/remote \
+ubuntu:whisper /bin/bash
+
