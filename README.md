@@ -31,7 +31,7 @@ https://stackoverflow.com/questions/4409502/directory-transfers-with-paramiko
 # docker build -f /path/to/your/Dockerfile -t your-image-name --mount type=bind,source=/path/on/host,target=/path/in/container .
 
 FROM https://docker.mirrors.ustc.edu.cn/library/ubuntu:22.04
-
+RUN sed -i 's/ports.ubuntu.com/mirror.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list
 
 RUN apt-get clean  
 RUN apt-get update -y 
