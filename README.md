@@ -18,6 +18,8 @@ https://stackoverflow.com/questions/4409502/directory-transfers-with-paramiko
 
 ## DockerFile
 
+# docker build -f /path/to/your/Dockerfile -t your-image-name --mount type=bind,source=/path/on/host,target=/path/in/container .
+
 FROM ubuntu:22.04
 
 
