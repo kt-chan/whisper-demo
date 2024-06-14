@@ -90,7 +90,7 @@ export LD_LIBRARY_PATH=/usr/local/Ascend/driver/lib64/driver/:$LD_LIBRARY_PATH
 
 https://www.rosehosting.com/blog/how-to-install-miniconda-on-ubuntu-22-04/
 
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O /opt/miniconda-installer.sh
+curl -o ./miniconda-installer.sh https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Linux-aarch64.sh 
 
 bash /opt/miniconda-installer.sh
 
