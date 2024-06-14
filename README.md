@@ -85,6 +85,11 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
 
 export LD_LIBRARY_PATH=/usr/local/Ascend/driver/lib64/driver/:$LD_LIBRARY_PATH
 
+
+# Install minicoda3
+
+https://www.rosehosting.com/blog/how-to-install-miniconda-on-ubuntu-22-04/
+
 source /root/miniconda3/bin/activate
 
 
