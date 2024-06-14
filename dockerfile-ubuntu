@@ -1,0 +1,22 @@
+FROM ubuntu:22.04 
+# FROM https://docker.mirrors.ustc.edu.cn/library/ubuntu:22.04
+#COPY ./conf/sources.list /etc/apt/sources.list
+#RUN chmod 644 /etc/apt/sources.list
+
+RUN sed -i 's/ports.ubuntu.com/mirror.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list
+
+RUN mkdir -p /mnt/remote/whisper/
+COPY ./bin/Ascend-cann-kernels-910b_7.0.1.1_linux.run /mnt/remote/whisper/.
+COPY ./bin/Ascend-cann-toolkit_7.0.1.1_linux-aarch64.run  /mnt/remote/whisper/.
+COPY ./bin/torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl  /mnt/remote/whisper/.
+
+RUN apt-get clean
+RUN apt-get update -y 
+RUN apt-get install -y net-tools vim wget curl ssh openjdk-8-jdk sudo 
+RUN apt-get install -y git gcc g++ make cmake build-essential ffmpeg 
+RUN ls -al /mnt/remote/whisper/*
+RUN chmod +x /mnt/remote/whisper/* 
+#RUN apt-get install -y python3-pip
+#RUN /mnt/remote/whisper/Ascend-cann-toolkit_7.0.1.1_linux-aarch64.run --quiet --full 
+#RUN /mnt/remote/whisper/Ascend-cann-kernels-910b_7.0.1.1_linux.run --quiet --install
+
