@@ -88,6 +88,9 @@ export LD_LIBRARY_PATH=/usr/local/Ascend/driver/lib64/driver/:$LD_LIBRARY_PATH
 
 # Install minicoda3
 
+pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cpu
+
+
 https://www.rosehosting.com/blog/how-to-install-miniconda-on-ubuntu-22-04/
 
 curl -o ./miniconda-installer.sh https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Linux-aarch64.sh 
