@@ -20,7 +20,7 @@ https://stackoverflow.com/questions/4409502/directory-transfers-with-paramiko
 /etc/docker/daemon.json 
 
 {
-  "registry-mirrors": ["https://mirrors.tuna.tsinghua.edu.cn/docker-ce"]
+  "registry-mirrors": ["https://mirrors.ustc.edu.cn", "https://mirrors.tuna.tsinghua.edu.cn/docker-ce"]
 }
 
 # docker build -f /path/to/your/Dockerfile -t your-image-name --mount type=bind,source=/path/on/host,target=/path/in/container .
