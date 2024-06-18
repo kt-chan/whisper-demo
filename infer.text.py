@@ -22,3 +22,20 @@ transcription = model.transcribe(audio_input)
 
 # Print the transcription result
 print(transcription)
+
+
+
+from transformers import WhisperModel, WhisperTokenizer
+
+# Load the model and tokenizer
+model = WhisperModel.from_pretrained("openai/whisper-large-v3")
+tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-large-v3")
+
+# Encode the audio input along with an initial prompt
+inputs = tokenizer("Your initial context here", return_tensors="pt")
+transcription_logits = model(**inputs).logits
+
+# Decode the transcription
+transcription = tokenizer.batch_decode(transcription_logits)
+
+print(transcription)
