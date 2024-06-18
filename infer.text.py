@@ -15,10 +15,10 @@ audio_file_path = "path_to_your_audio_file.wav"
 # audio_input = process_audio(audio_file_path)
 
 # Transcribe the audio
-# transcription = model.transcribe(audio_input)
+transcription = model.transcribe(audio_input)
 
 # Since the actual implementation details will depend on the model's requirements,
 # the above code is a high-level outline and may require additional steps to work correctly.
 
 # Print the transcription result
-# print(transcription)
+print(transcription)
