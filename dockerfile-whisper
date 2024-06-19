@@ -13,17 +13,14 @@ ENV PATH /root/miniconda3/bin:$PATH
 
 # Set the working directory in the container
 WORKDIR /root/demo
-# ADD set_env.sh /root/demo/
-# RUN chmod u+x /root/demo/set_env.sh
 
 # Create a conda environment with a specified name and python version
-# RUN conda create -y --prefix /mnt/remote/whisper/venv python=3.10
+RUN conda create -y --name whisper python=3.10 pip
 # Initialize the Conda environment and set the PATH
-# ENV PATH="/mnt/remote/whisper/venv/bin:$PATH"
+ENV PATH="/root/miniconda3/bin:$PATH"
 
 # You can also set other Conda-specific environment variables if needed
-# ENV CONDA_DEFAULT_ENV="/mnt/remote/whisper/venv"
-# ENV PATH /mnt/remote/whisper/venv/bin:$PATH
+ENV CONDA_DEFAULT_ENV="whisper"
 
 # Activate the conda environment and Install System Dependnecy
 # Use the full path to the activate script to activate the environment
@@ -36,16 +33,21 @@ WORKDIR /root/demo
 ## 中国科技大学镜像源：http://pypi.mirrors.ustc.edu.cn/simple/
 ## 豆瓣Python3源：https://pypi.douban.com/simple/python3/
 
-ADD requirements.txt /root/demo/
-RUN /root/miniconda3/bin/activate
-RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple                         \
-&& pip config set global.extra-index-url https://mirrors.aliyun.com/pypi/simple                      \
-&& pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/                    \
-&& pip config set global.extra-index-url https://repo.huaweicloud.com/repository/pypi/simple/        \
-&& pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/                    
+ADD requirements.txt /root/demo/ 
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple                                               \
+&& pip config set global.extra-index-url https://mirrors.aliyun.com/pypi/simple                                            \
+&& pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/                                          \
+&& pip config set global.extra-index-url https://repo.huaweicloud.com/repository/pypi/simple/                              \
+&& pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/  
 
-RUN pip install /mnt/remote/whisper/torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
-RUN pip install -r /root/demo/requirements.txt
+# Assuming you have Conda installed in /root/miniconda3 and your environment is named 'whisper'
+ENV CONDA_ENV_PATH="/root/miniconda3/envs/whisper"
+RUN conda run -n whisper pip install /mnt/remote/whisper/torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+RUN conda run -n whisper pip install -r /root/demo/requirements.txt                                                                      
+
+# upload set_env.sh for source variables
+ADD set_env.sh /root/demo/
+RUN chmod u+x /root/demo/set_env.sh
 
 # Specify the command to run on container start
 CMD ["tail", "-f", "/dev/null"]
