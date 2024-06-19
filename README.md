@@ -3,6 +3,26 @@ docker build -f dockerfile-ubuntu -t ubuntu:22.04 .
 docker build -f dockerfile-whisper -t whisper .
 
 ==========================================================
+配置国内镜像源
+
+打开PyCharm，选择"File" > "Settings"（对于Mac用户是"PyCharm" > "Preferences"）。
+
+在设置窗口中，选择"Project" > "Python Interpreter"。
+
+选择你正在使用的解释器。
+
+在右侧的"Pip"选项卡中，找到"Pip repository"设置。
+
+点击"..."按钮，选择"Add"。
+
+在弹出的窗口中，输入国内镜像源的URL。以下是一些常用的国内镜像源URL：
+
+阿里云：https://mirrors.aliyun.com/pypi/simple/
+清华大学：https://pypi.tuna.tsinghua.edu.cn/simple/
+中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/
+豆瓣Douban：https://pypi.douban.com/simple/
+
+==========================================================
 https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.6.7/npp.8.6.7.Installer.x64.exe
 
 https://nf-sycdn.kuwo.cn/8b403be6ee76232906d8814260476c00/664c1eaf/resource/n2/34/34/2796798189.mp3?from=vip
