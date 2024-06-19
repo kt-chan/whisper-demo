@@ -8,7 +8,9 @@
 !pip install gradio
 
 #使用 🤗 Datasets 来下载和准备数据非常简单。仅需一行代码即可完成 Common Voice 数据集的下载和准备工作。由于印地语数据非常匮乏，我们把 训练集 和 验证集合并成约 8 小时的训练数据，而测试则基于 4 小时的 测试集:
-
+import torch 
+import torch_npu 
+from torch_npu.contrib import transfer_to_npu
 from datasets import load_dataset, DatasetDict
 
 common_voice = DatasetDict()
