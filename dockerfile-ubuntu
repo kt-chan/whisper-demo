@@ -14,9 +14,3 @@ RUN apt-get clean
 RUN apt-get update -y 
 RUN apt-get install -y net-tools vim wget curl ssh openjdk-8-jdk sudo 
 RUN apt-get install -y git gcc g++ make cmake build-essential ffmpeg 
-RUN ls -al /mnt/remote/whisper/*
-RUN chmod +x /mnt/remote/whisper/* 
-#RUN apt-get install -y python3-pip
-#RUN /mnt/remote/whisper/Ascend-cann-toolkit_7.0.1.1_linux-aarch64.run --quiet --full 
-#RUN /mnt/remote/whisper/Ascend-cann-kernels-910b_7.0.1.1_linux.run --quiet --install
-

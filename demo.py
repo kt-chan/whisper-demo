@@ -13,7 +13,8 @@ hostname = "172.16.108.226"
 port = 22
 
 print('argument list: ', sys.argv)
-audio_file = sys.argv[1]
+action_cmd = sys.argv[1].lower()
+audio_file = sys.argv[2]
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -79,18 +80,27 @@ def running():
         # 执行命令，和传统方法一样 sftp
         sftp = MySFTPClient.from_transport(trans)
         sftp.mkdir(target_path, ignore_existing=True)
+        sftp.mkdir(target_path + r'/voice', ignore_existing=True)
+        sftp.mkdir(target_path + r'/scripts', ignore_existing=True)
         sftp.put_dir(source_path + r'\voice', target_path + r'/voice')
+        sftp.put_dir(source_path + r'\scripts', target_path + r'/scripts')
         sftp.put(source_path + r'\infer.py', target_path + r'/infer.py')
         sftp.put(source_path + r'\whisper-finetune.py', target_path + r'/whisper-finetune.py')
         sftp.put(source_path + r'\set_env.sh', target_path + r'/set_env.sh')
-        sftp.put(source_path + r'\decode.sh', target_path + r'/decode.sh')
+        sftp.put(source_path + r'\scripts\decode.sh', target_path + r'/scripts/decode.sh')
+        sftp.put(source_path + r'\scripts\finetune.sh', target_path + r'/scripts/finetune.sh')
 
         # 执行命令，和传统方法一样 ssh
-        stdin, stdout, stderr = ssh.exec_command(r'cd ~/demo/ && chmod +x ./decode.sh')
+        stdin, stdout, stderr = ssh.exec_command(r'cd ~/demo/ && chmod +x ./scripts/decode.sh')
+        exec_cmd = ""
+        if action_cmd == "transcribe":
+            exec_cmd = r'./scripts/decode.sh ' + audio_file + r'" '
+        elif action_cmd == "train":
+            exec_cmd = r'./scripts/finetune.sh'
+
         stdin, stdout, stderr = ssh.exec_command(
-            #r'cd ~/demo/ && docker exec -u root -t whisper bash -c "cd /root/demo && source ./set_env.sh && ./decode.sh ' + audio_file + r'" --initial_prompt "燃料調整費 煤氣公司 請問有乜嘢幫到你 交煤氣費 戶口欠費 抄錶 截咗煤氣 開錶費 按金 煤氣爐 師傅 拆爐 保養月費 電芯 早晨 午安"'
-            r'cd ~/demo/ && docker exec -u root -t whisper bash -c "cd /root/demo && source ./set_env.sh && ./decode.sh ' + audio_file + r'" '
-        , get_pty=True)
+            r'cd ~/demo/ && docker exec -u root -t whisper bash -c "cd /root/demo && source ./set_env.sh &&' + exec_cmd
+            , get_pty=True)
 
         # Read the output as it comes in
         while True:

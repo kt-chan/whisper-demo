@@ -1,16 +1,47 @@
 FROM ubuntu:22.04 
+
 RUN apt update && apt install python3-pip -y
+RUN chmod +x /mnt/remote/whisper/* 
 RUN /mnt/remote/whisper/Ascend-cann-toolkit_7.0.1.1_linux-aarch64.run --quiet --full 
 RUN /mnt/remote/whisper/Ascend-cann-kernels-910b_7.0.1.1_linux.run --quiet --install
-COPY ./bin/miniconda-installer.sh /mnt/remote/whisper/.
-RUN chmod +x /mnt/remote/whisper/*
-RUN /mnt/remote/whisper/miniconda-installer.sh -b -p /root/miniconda3/
-RUN /usr/local/Ascend/ascend-toolkit/set_env.sh
-RUN export LD_LIBRARY_PATH=/usr/local/Ascend/driver/lib64/driver/:$LD_LIBRARY_PATH
-RUN /root/miniconda3/bin/activate
-
-#RUN pip install torch==2.1.0 -i https://mirrors.aliyun.com/pypi/simple/
-RUN pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 -i https://mirrors.aliyun.com/pypi/simple/
 RUN pip install /mnt/remote/whisper/torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
-RUN pip install decorator attrs psutil absl-py cloudpickle scipy synr==0.5.0 tornado numpy pandas sentencepiece accelerate transformers==4.37.0 datasets>=2.6.1  librosa  evaluate>=0.30  jiwer  pysoundfile>=0.12.1  gradio -i https://mirrors.aliyun.com/pypi/simple/
 
+# setup minicuda for venv
+COPY ./bin/miniconda-installer.sh /mnt/remote/whisper/.
+RUN chmod u+x  /mnt/remote/whisper/miniconda-installer.sh
+RUN /mnt/remote/whisper/miniconda-installer.sh -b -p /root/miniconda3/
+ENV PATH /root/miniconda3/bin:$PATH
+
+# Set the working directory in the container
+WORKDIR /root/demo
+ADD set_env.sh /root/demo/
+RUN chmod u+x /root/demo/set_env.sh
+
+# Create a conda environment with a specified name and python version
+RUN conda create -y --prefix ./.venv python=3.9
+
+# Activate the conda environment and Install System Dependnecy
+# Use the full path to the activate script to activate the environment
+## 清华大学镜像源：https://pypi.tuna.tsinghua.edu.cn/simple
+## 阿里云镜像源：http://mirrors.aliyun.com/pypi/simple/
+## 中国科学技术大学镜像源：https://pypi.mirrors.ustc.edu.cn/simple/
+## 豆瓣镜像源：http://pypi.douban.com/simple/
+## 豆瓣Dart源：https://pypi.douban.com/simple/dart/
+## 华为云镜像源：https://repo.huaweicloud.com/repository/pypi/simple/
+## 中国科技大学镜像源：http://pypi.mirrors.ustc.edu.cn/simple/
+## 豆瓣Python3源：https://pypi.douban.com/simple/python3/
+
+ADD requirements.txt /root/demo/
+RUN /bin/bash -c "source activate /root/demo/.venv && python --version                                \
+&& pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple                          \
+&& pip config set global.extra-index-url https://mirrors.aliyun.com/pypi/simple                      \
+&& pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/                    \
+&& pip config set global.extra-index-url https://repo.huaweicloud.com/repository/pypi/simple/        \
+&& pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/                    \
+&& pip install -r /root/demo/requirements.txt"
+
+# Setup venv path
+ENV PATH /root/demo/.venv/bin:$PATH
+
+# Specify the command to run on container start
+CMD ["tail", "-f", "/dev/null"]
