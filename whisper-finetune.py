@@ -23,7 +23,21 @@ common_voice["test"] = load_dataset("mozilla-foundation/common_voice_11_0", "hi"
 
 print(common_voice)
 
-大#多数 ASR 数据集仅包含输入音频样本 ( audio) 和相应的转录文本 ( sentence)。 Common Voice 还包含额外的元信息，例如 accent 和 locale，在 ASR 场景中，我们可以忽略这些信息。为了使代码尽可能通用，我们只考虑基于输入音频和转录文本进行微调，而不使用额外的元信息:
+## output
+## 
+## DatasetDict({
+##     train: Dataset({
+##         features: ['client_id', 'path', 'audio', 'sentence', 'up_votes', 'down_votes', 'age', 'gender', 'accent', 'locale', 'segment'],
+##         num_rows: 6540
+##     })
+##     test: Dataset({
+##         features: ['client_id', 'path', 'audio', 'sentence', 'up_votes', 'down_votes', 'age', 'gender', 'accent', 'locale', 'segment'],
+##         num_rows: 2894
+##     })
+## })
+
+
+#大多数 ASR 数据集仅包含输入音频样本 ( audio) 和相应的转录文本 ( sentence)。 Common Voice 还包含额外的元信息，例如 accent 和 locale，在 ASR 场景中，我们可以忽略这些信息。为了使代码尽可能通用，我们只考虑基于输入音频和转录文本进行微调，而不使用额外的元信息:
 
 common_voice = common_voice.remove_columns(["accent", "age", "client_id", "down_votes", "gender", "locale", "path", "segment", "up_votes"])
 
