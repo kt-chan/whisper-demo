@@ -66,7 +66,7 @@ def running():
         # #
         # 实例化一个transport对象
         pprint.pp("generation text from this audio file: " + audio_file)
-        source_path = r'C:\Users\user1\Documents\whisper-demo'
+        source_path = os.path.dirname(os.path.realpath(__file__))
         target_path = r'/root/demo'
 
         trans = paramiko.Transport((hostname, port))
@@ -74,21 +74,34 @@ def running():
         trans.connect(username=username, password=password)
         ssh = paramiko.SSHClient()
         ssh._transport = trans
-        # 执行命令，和传统方法一样
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        # 执行命令，和传统方法一样 sftp
         sftp = MySFTPClient.from_transport(trans)
         sftp.mkdir(target_path, ignore_existing=True)
         sftp.put_dir(source_path + r'\voice', target_path + r'/voice')
         sftp.put(source_path + r'\infer.py', target_path + r'/infer.py')
+        sftp.put(source_path + r'\whisper-finetune.py', target_path + r'/whisper-finetune.py')
         sftp.put(source_path + r'\set_env.sh', target_path + r'/set_env.sh')
         sftp.put(source_path + r'\decode.sh', target_path + r'/decode.sh')
+
+        # 执行命令，和传统方法一样 ssh
         stdin, stdout, stderr = ssh.exec_command(r'cd ~/demo/ && chmod +x ./decode.sh')
         stdin, stdout, stderr = ssh.exec_command(
-            r'cd ~/demo/ && docker exec -u root -t whisper bash -c "cd /root/demo && source ./set_env.sh && ./decode.sh ' + audio_file + r'"'
-        )
-        pprint.pp(stdout.read().decode())
+            #r'cd ~/demo/ && docker exec -u root -t whisper bash -c "cd /root/demo && source ./set_env.sh && ./decode.sh ' + audio_file + r'" --initial_prompt "燃料調整費 煤氣公司 請問有乜嘢幫到你 交煤氣費 戶口欠費 抄錶 截咗煤氣 開錶費 按金 煤氣爐 師傅 拆爐 保養月費 電芯 早晨 午安"'
+            r'cd ~/demo/ && docker exec -u root -t whisper bash -c "cd /root/demo && source ./set_env.sh && ./decode.sh ' + audio_file + r'" '
+        , get_pty=True)
+
+        # Read the output as it comes in
+        while True:
+            output = stdout.readline()
+            if output == '':
+                break
+            print(output.strip())
 
         # 关闭连接
         trans.close()
+        ssh.close()
         interrupt_main()
     except Exception:
         print('Exception!!')

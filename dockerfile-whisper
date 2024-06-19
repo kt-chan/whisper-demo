@@ -12,5 +12,5 @@ RUN /root/miniconda3/bin/activate
 #RUN pip install torch==2.1.0 -i https://mirrors.aliyun.com/pypi/simple/
 RUN pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 -i https://mirrors.aliyun.com/pypi/simple/
 RUN pip install /mnt/remote/whisper/torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
-RUN pip install decorator attrs psutil absl-py cloudpickle scipy synr==0.5.0 tornado numpy pandas sentencepiece accelerate transformers==4.37.0 datasets -i https://mirrors.aliyun.com/pypi/simple/
+RUN pip install decorator attrs psutil absl-py cloudpickle scipy synr==0.5.0 tornado numpy pandas sentencepiece accelerate transformers==4.37.0 datasets>=2.6.1  librosa  evaluate>=0.30  jiwer  pysoundfile>=0.12.1  gradio -i https://mirrors.aliyun.com/pypi/simple/
 
