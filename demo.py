@@ -12,9 +12,21 @@ password = "Cube@6789"
 hostname = "172.16.108.226"
 port = 22
 
+# sample config
+# 1. transcribe ./voice/_7_7_7138666916734895261_1_73.wav
+# 2. train
+
 print('argument list: ', sys.argv)
-action_cmd = sys.argv[1].lower()
-audio_file = sys.argv[2]
+action_cmd = ""
+audio_file = ""
+
+# Check the length of sys.argv
+arg_length = len(sys.argv) - 1
+if arg_length == 1:
+    action_cmd = sys.argv[1].lower()
+elif arg_length == 2:
+    action_cmd = sys.argv[1].lower()
+    audio_file = sys.argv[2]
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -66,7 +78,6 @@ def running():
         # pprint.pp(result)
         # #
         # 实例化一个transport对象
-        pprint.pp("generation text from this audio file: " + audio_file)
         source_path = os.path.dirname(os.path.realpath(__file__))
         target_path = r'/root/demo'
 
@@ -81,22 +92,23 @@ def running():
         sftp = MySFTPClient.from_transport(trans)
         sftp.mkdir(target_path, ignore_existing=True)
         sftp.mkdir(target_path + r'/voice', ignore_existing=True)
-        sftp.mkdir(target_path + r'/scripts', ignore_existing=True)
         sftp.put_dir(source_path + r'\voice', target_path + r'/voice')
-        sftp.put_dir(source_path + r'\scripts', target_path + r'/scripts')
         sftp.put(source_path + r'\infer.py', target_path + r'/infer.py')
         sftp.put(source_path + r'\whisper-finetune.py', target_path + r'/whisper-finetune.py')
         sftp.put(source_path + r'\set_env.sh', target_path + r'/set_env.sh')
-        sftp.put(source_path + r'\scripts\decode.sh', target_path + r'/scripts/decode.sh')
-        sftp.put(source_path + r'\scripts\finetune.sh', target_path + r'/scripts/finetune.sh')
+        sftp.put(source_path + r'\decode.sh', target_path + r'/decode.sh')
+        sftp.put(source_path + r'\finetune.sh', target_path + r'/finetune.sh')
 
         # 执行命令，和传统方法一样 ssh
-        stdin, stdout, stderr = ssh.exec_command(r'cd ~/demo/ && chmod +x ./scripts/decode.sh')
+        stdin, stdout, stderr = ssh.exec_command(r'cd ~/demo/ && chmod +x ./decode.sh')
+        stdin, stdout, stderr = ssh.exec_command(r'cd ~/demo/ && chmod +x ./finetune.sh')
         exec_cmd = ""
         if action_cmd == "transcribe":
-            exec_cmd = r'./scripts/decode.sh ' + audio_file + r'" '
+            pprint.pp("generation text from this audio file: " + audio_file)
+            exec_cmd = r'./decode.sh ' + audio_file + r'" '
         elif action_cmd == "train":
-            exec_cmd = r'./scripts/finetune.sh'
+            pprint.pp("fine tunning whisper model")
+            exec_cmd = r'./finetune.sh'+ r'" '
 
         stdin, stdout, stderr = ssh.exec_command(
             r'cd ~/demo/ && docker exec -u root -t whisper bash -c "cd /root/demo && source ./set_env.sh &&' + exec_cmd

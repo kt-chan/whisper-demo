@@ -3,8 +3,8 @@ import pprint
 
 import torch
 import torch_npu
+from torch_npu.contrib import transfer_to_npu
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
-from datasets import load_dataset
 
 print('argument list: ', sys.argv)
 audio_file = sys.argv[1]

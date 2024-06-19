@@ -1,10 +1,9 @@
-FROM ubuntu:22.04 
+FROM ubuntu:22.04
 
 RUN apt update && apt install python3-pip -y
 RUN chmod +x /mnt/remote/whisper/* 
 RUN /mnt/remote/whisper/Ascend-cann-toolkit_7.0.1.1_linux-aarch64.run --quiet --full 
 RUN /mnt/remote/whisper/Ascend-cann-kernels-910b_7.0.1.1_linux.run --quiet --install
-RUN pip install /mnt/remote/whisper/torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
 
 # setup minicuda for venv
 COPY ./bin/miniconda-installer.sh /mnt/remote/whisper/.
@@ -14,11 +13,17 @@ ENV PATH /root/miniconda3/bin:$PATH
 
 # Set the working directory in the container
 WORKDIR /root/demo
-ADD set_env.sh /root/demo/
-RUN chmod u+x /root/demo/set_env.sh
+# ADD set_env.sh /root/demo/
+# RUN chmod u+x /root/demo/set_env.sh
 
 # Create a conda environment with a specified name and python version
-RUN conda create -y --prefix ./.venv python=3.9
+# RUN conda create -y --prefix /mnt/remote/whisper/venv python=3.10
+# Initialize the Conda environment and set the PATH
+# ENV PATH="/mnt/remote/whisper/venv/bin:$PATH"
+
+# You can also set other Conda-specific environment variables if needed
+# ENV CONDA_DEFAULT_ENV="/mnt/remote/whisper/venv"
+# ENV PATH /mnt/remote/whisper/venv/bin:$PATH
 
 # Activate the conda environment and Install System Dependnecy
 # Use the full path to the activate script to activate the environment
@@ -32,16 +37,15 @@ RUN conda create -y --prefix ./.venv python=3.9
 ## 豆瓣Python3源：https://pypi.douban.com/simple/python3/
 
 ADD requirements.txt /root/demo/
-RUN /bin/bash -c "source activate /root/demo/.venv && python --version                                \
-&& pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple                          \
+RUN /root/miniconda3/bin/activate
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple                         \
 && pip config set global.extra-index-url https://mirrors.aliyun.com/pypi/simple                      \
 && pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/                    \
 && pip config set global.extra-index-url https://repo.huaweicloud.com/repository/pypi/simple/        \
-&& pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/                    \
-&& pip install -r /root/demo/requirements.txt"
+&& pip config set global.extra-index-url https://pypi.mirrors.ustc.edu.cn/simple/                    
 
-# Setup venv path
-ENV PATH /root/demo/.venv/bin:$PATH
+RUN pip install /mnt/remote/whisper/torch_npu-2.1.0.post2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+RUN pip install -r /root/demo/requirements.txt
 
 # Specify the command to run on container start
 CMD ["tail", "-f", "/dev/null"]
