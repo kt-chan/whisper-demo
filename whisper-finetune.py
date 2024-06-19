@@ -12,6 +12,9 @@ import torch
 import torch_npu 
 from torch_npu.contrib import transfer_to_npu
 from datasets import load_dataset, DatasetDict
+from huggingface_hub import notebook_login
+
+notebook_login()
 
 common_voice = DatasetDict()
 
