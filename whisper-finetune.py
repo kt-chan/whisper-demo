@@ -160,7 +160,7 @@ from transformers import Seq2SeqTrainingArguments
 ## this would roughly run 40 epoch for training data size of 2000
 training_args = Seq2SeqTrainingArguments(
     output_dir="./"+model_name+"-yue",  # change to a repo name of your choice
-    per_device_train_batch_size=4,
+    per_device_train_batch_size=16,
     gradient_accumulation_steps=4,  # increase by 2x for every 2x decrease in batch size
     learning_rate=1e-5,
     warmup_steps=500,

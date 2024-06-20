@@ -22,7 +22,7 @@
 
 5. run and wait for the output, 	
 	# for transribe, it takes around 10 seconds for 5 mins audio files, enjoy
-	# for train, it takes around 20 epoche for 5000 training size (mozilla-foundation/common_voice_11_0 - yue/cantonese samples) at current config
+	# for train, it takes around 60 epoche for 5000 training size (mozilla-foundation/common_voice_11_0 - yue/cantonese samples) at current config
 
 ########## Appendix ##########
 
