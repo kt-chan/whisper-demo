@@ -17,7 +17,7 @@
 3. modify infer.py if necessary for infer parameters setup
 4. edit configuration to set the parameter for run 
 
-	# 1. --transcribe ./voice/_7_7_7138666916734895261_1_73.wav
+	# 1. --transcribe ./voice/2796798189.mp3
 	# 2. --train
 
 5. run and wait for the output, 	
