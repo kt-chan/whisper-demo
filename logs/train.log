@@ -1,0 +1,66 @@
+C:\Users\cwchan\Documents\whisper-demo\.venv\Scripts\python.exe C:\Users\cwchan\Documents\whisper-demo\demo.py --train 
+argument list:  ['C:\\Users\\cwchan\\Documents\\whisper-demo\\demo.py', '--train']
+'fine-tuning whisper, and this would take long time ...'
+...../root/miniconda3/envs/whisper/lib/python3.10/site-packages/torch_npu/dynamo/__init__.py:18: UserWarning: Register eager implementation for the 'npu' backend of dynamo, as torch_npu was not compiled with torchair.
+warnings.warn(
+/root/miniconda3/envs/whisper/lib/python3.10/site-packages/torch_npu/contrib/transfer_to_npu.py:164: ImportWarning:
+*************************************************************************************************************
+The torch.Tensor.cuda and torch.nn.Module.cuda are replaced with torch.Tensor.npu and torch.nn.Module.npu now..
+The torch.cuda.DoubleTensor is replaced with torch.npu.FloatTensor cause the double type is not supported now..
+The backend in torch.distributed.init_process_group set to hccl now..
+The torch.cuda.* and torch.cuda.amp.* are replaced with torch.npu.* and torch.npu.amp.* now..
+The device parameters have been replaced with npu in the function below:
+torch.logspace, torch.randint, torch.hann_window, torch.rand, torch.full_like, torch.ones_like, torch.rand_like, torch.randperm, torch.arange, torch.frombuffer, torch.normal, torch._empty_per_channel_affine_quantized, torch.empty_strided, torch.empty_like, torch.scalar_tensor, torch.tril_indices, torch.bartlett_window, torch.ones, torch.sparse_coo_tensor, torch.randn, torch.kaiser_window, torch.tensor, torch.triu_indices, torch.as_tensor, torch.zeros, torch.randint_like, torch.full, torch.eye, torch._sparse_csr_tensor_unsafe, torch.empty, torch._sparse_coo_tensor_unsafe, torch.blackman_window, torch.zeros_like, torch.range, torch.sparse_csr_tensor, torch.randn_like, torch.from_file, torch._cudnn_init_dropout_state, torch._empty_affine_quantized, torch.linspace, torch.hamming_window, torch.empty_quantized, torch._pin_memory, torch.Tensor.new_empty, torch.Tensor.new_empty_strided, torch.Tensor.new_full, torch.Tensor.new_ones, torch.Tensor.new_tensor, torch.Tensor.new_zeros, torch.Tensor.to, torch.nn.Module.to, torch.nn.Module.to_empty
+*************************************************************************************************************
+
+warnings.warn(msg, ImportWarning)
+..argument list:  ['whisper-finetune.py']
+Downloading data: 12.2kB [00:00, 19.6MB/s]
+Downloading data: 100%|████████████████████| 73.5M/73.5M [00:07<00:00, 9.46MB/s]
+Downloading data: 100%|█████████████████████| 63.1M/63.1M [01:14<00:00, 852kB/s]
+Downloading data: 100%|████████████████████| 68.3M/68.3M [00:04<00:00, 14.5MB/s]
+Downloading data: 100%|██████████████████████| 641M/641M [00:37<00:00, 16.9MB/s]
+Downloading data: 100%|████████████████████| 45.0M/45.0M [00:03<00:00, 13.1MB/s]
+Downloading data: 100%|███████████████████████| 709k/709k [00:00<00:00, 946kB/s]
+Downloading data: 100%|██████████████████████| 514k/514k [00:00<00:00, 2.33MB/s]
+Downloading data: 100%|███████████████████████| 503k/503k [00:00<00:00, 620kB/s]
+Downloading data: 100%|████████████████████| 5.39M/5.39M [00:01<00:00, 4.18MB/s]
+Downloading data: 100%|███████████████████████| 414k/414k [00:00<00:00, 465kB/s]
+Generating train split: 0 examples [00:00, ? examples/s]
+Reading metadata...: 2877it [00:00, 93884.06it/s]
+Generating train split: 2877 examples [00:01, 2166.82 examples/s]
+Generating validation split: 0 examples [00:00, ? examples/s]
+Reading metadata...: 2419it [00:00, 107189.49it/s]
+Generating validation split: 2419 examples [00:01, 2192.11 examples/s]
+Generating test split: 0 examples [00:00, ? examples/s]
+Reading metadata...: 2438it [00:00, 107838.87it/s]
+Generating test split: 2438 examples [00:01, 2174.05 examples/s]
+Generating other split: 0 examples [00:00, ? examples/s]
+Reading metadata...: 0it [00:00, ?it/s]
+Reading metadata...: 10254it [00:00, 102533.74it/s]
+Reading metadata...: 25100it [00:00, 102641.70it/s]
+Generating other split: 25100 examples [00:11, 2201.25 examples/s]
+Generating invalidated split: 0 examples [00:00, ? examples/s]
+Reading metadata...: 1559it [00:00, 97438.75it/s]
+Generating invalidated split: 1559 examples [00:00, 2257.65 examples/s]
+Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
+Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
+.Running long task on converting dataset ...
+Map (num_proc=64): 100%|█████████████| 5296/5296 [21:34<00:00,  4.09 examples/s]
+Map (num_proc=64): 100%|█████████████| 2438/2438 [06:19<00:00,  6.42 examples/s]
+.DatasetDict({
+train: Dataset({
+features: ['input_features', 'labels'],
+num_rows: 5296
+})
+test: Dataset({
+features: ['input_features', 'labels'],
+num_rows: 2438
+})
+})
+Downloading builder script: 4.49kB [00:00, 7.97MB/s]
+.....<frozen importlib._bootstrap>:671: ImportWarning: TBEMetaPathLoader.exec_module() not found; falling back to load_module()
+..............Running long task on training the model  ...
+....0%|                                                  | 0/5000 [00:00<?, ?it/s]`use_cache = True` is incompatible with gradient checkpointing. Setting `use_cache = False`...
+............[W AmpForeachNonFiniteCheckAndUnscaleKernelNpuOpApi.cpp:104] Warning: Non finite check and unscale on NPU device! (function operator())
+.....................................................................................................................................................
