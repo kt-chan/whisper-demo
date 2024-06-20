@@ -9,22 +9,28 @@
 #使用 🤗 Datasets 来下载和准备数据非常简单。仅需一行代码即可完成 Common Voice 数据集的下载和准备工作。由于印地语数据非常匮乏，我们把 训练集 和 验证集合并成约 8 小时的训练数据，而测试则基于 4 小时的 测试集:
 import os, sys, time
 import pprint
+import pickle
 import torch
 import torch_npu
 from torch_npu.contrib import transfer_to_npu
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from datasets import load_dataset, DatasetDict, Audio
+from transformers import WhisperFeatureExtractor, WhisperTokenizer, WhisperProcessor
+
+print('argument list: ', sys.argv)
 
 device = "npu:0"
 torch_dtype = torch.float16
 
-print('argument list: ', sys.argv)
-
-from datasets import load_dataset, DatasetDict
 os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 current_dir = os.path.dirname(os.path.realpath(__file__))
+cache_file_path = r'/root/demo/.cache.serialized_data_cache.zip'
 data_dir = "/root/demo/data/"
 model_name = 'whisper-large-v3'
 model_id = "/mnt/remote/models/whisper/whisper-large-v3/"
+beijing_timezone = ZoneInfo("Asia/Shanghai")
 
 common_voice = DatasetDict()
 common_voice["train"] = load_dataset(data_dir + r"./mozilla-foundation/common_voice_11_0", "yue",
@@ -36,9 +42,6 @@ common_voice = common_voice.remove_columns(
 
 # #Transformers Whisper 特征提取器仅用一行代码即可执行填充和声谱图变换两个操作！我们使用以下代码从预训练的 checkpoint 中加载特征提取器，为音频数据处理做好准备.我们可以通过对 Common Voice 数据集的第一个样本进行编解码来验证分词器是否正确编码了印地语字符。
 # #在对转录文本进行编码时，分词器在序列的开头和结尾添加“特殊标记”，其中包括文本的开始/结尾、语种标记和任务标记 (由上一步中的参数指定)。在解码时，我们可以选择“跳过”这些特殊标记，从而保证输出是纯文本形式的:
-#
-from transformers import WhisperFeatureExtractor, WhisperTokenizer, WhisperProcessor
-
 feature_extractor = WhisperFeatureExtractor.from_pretrained(model_id)
 tokenizer = WhisperTokenizer.from_pretrained(model_id, language="Cantonese", task="transcribe")
 # input_str = common_voice["train"][0]["sentence"]
@@ -56,12 +59,7 @@ processor.tokenizer.skip_special_tokens = True
 # 我们将使用 dataset 的 cast_column 方法将输入音频转换至所需的采样率。
 # 我们将使用 dataset 的 cast_column 方法将输入音频转换至所需的采样率。
 # 该方法仅指示 datasets 让其在首次加载音频时 _即时地_对数据进行重采样，因此并不会改变原音频数据:
-from datasets import Audio
-
 common_voice = common_voice.cast_column("audio", Audio(sampling_rate=16000))
-
-
-# print(common_voice)
 
 # 现在我们编写一个函数来为模型准备数据:
 def prepare_dataset(batch):
@@ -78,12 +76,28 @@ def prepare_dataset(batch):
 # @DEBUG
 # Sample test with first 100 records
 # remove these two lines for official training
-# common_voice = {split: dataset.take(100) for split, dataset in common_voice.items()}
+# common_voice = {split: dataset.take(10) for split, dataset in common_voice.items()}
 # common_voice = DatasetDict(common_voice)
 
-print('Running long task on converting dataset ... ')
-common_voice = common_voice.map(prepare_dataset, remove_columns=common_voice.column_names["train"], num_proc=64)
-print(common_voice)
+# check cache to avoid repeated etl
+# Check if the file exists
+if os.path.exists(cache_file_path):
+    print(f"The file '{cache_file_path}' exists.")
+    with open(cache_file_path, 'rb') as f:
+        common_voice = pickle.load(f)
+        print(f"The data has been loaded from {cache_file_path}")
+else:
+    print(f"The file '{cache_file_path}' does not exist, running long task on converting dataset ... ")
+    print("Current timestamp:", datetime.now(beijing_timezone).strftime("%Y-%m-%d %H:%M:%S"))
+    common_voice = common_voice.map(prepare_dataset, remove_columns=common_voice.column_names["train"], num_proc=64)
+    print(common_voice)
+    # Serialize the data using pickle and write it to a temporary binary file
+    with open(cache_file_path, 'wb') as f:
+        pickle.dump(common_voice, f)
+        print(f"The data has been serialized, zipped, and saved to {cache_file_path}")
+
+
+
 
 # Load a Pre-Trained Checkpoint
 from transformers import WhisperForConditionalGeneration
@@ -139,6 +153,10 @@ metric = evaluate.load("wer")
 
 
 def compute_metrics(pred):
+    # Get the current datetime
+    print("compute_metrics ...")
+    print("Current timestamp:", datetime.now(beijing_timezone).strftime("%Y-%m-%d %H:%M:%S"))
+
     pred_ids = pred.predictions
     label_ids = pred.label_ids
 
@@ -148,9 +166,7 @@ def compute_metrics(pred):
     # we do not want to group tokens when computing the metrics
     pred_str = tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
     label_str = tokenizer.batch_decode(label_ids, skip_special_tokens=True)
-
     wer = 100 * metric.compute(predictions=pred_str, references=label_str)
-
     return {"wer": wer}
 
 
@@ -160,7 +176,7 @@ from transformers import Seq2SeqTrainingArguments
 ## this would roughly run 40 epoch for training data size of 2000
 training_args = Seq2SeqTrainingArguments(
     output_dir="./"+model_name+"-yue",  # change to a repo name of your choice
-    per_device_train_batch_size=16,
+    per_device_train_batch_size=4,
     gradient_accumulation_steps=4,  # increase by 2x for every 2x decrease in batch size
     learning_rate=1e-5,
     warmup_steps=500,
@@ -196,5 +212,8 @@ trainer = Seq2SeqTrainer(
     tokenizer=processor.feature_extractor,
 )
 
+
+
 print('Running long task on training the model  ... ')
+print("Current timestamp:", datetime.now(beijing_timezone).strftime("%Y-%m-%d %H:%M:%S"))
 trainer.train()

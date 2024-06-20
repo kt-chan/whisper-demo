@@ -107,6 +107,7 @@ def running(action_cmd, *args):
         sftp.put_dir(source_path + r'\voice', target_path + r'/voice')
         sftp.put(source_path + r'\infer.py', target_path + r'/infer.py')
         sftp.put(source_path + r'\whisper-finetune.py', target_path + r'/whisper-finetune.py')
+        sftp.put(source_path + r'\start.sh', target_path + r'/start.sh')
         sftp.put(source_path + r'\set_env.sh', target_path + r'/set_env.sh')
         sftp.put(source_path + r'\decode.sh', target_path + r'/decode.sh')
         sftp.put(source_path + r'\finetune.sh', target_path + r'/finetune.sh')

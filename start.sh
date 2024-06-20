@@ -10,6 +10,8 @@ if [ "$(docker ps -q -f name=^/${CONTAINER_NAME})" ]; then
     docker rm -f "$CONTAINER_NAME"
 fi
 
+rm -rf /root/demo/.cache.serialized_data_cache.zip
+
 docker run -itd -u root                                                                    \
 --ipc=host --network=host --name ${CONTAINER_NAME}                                         \
 --device=/dev/davinci0                                                                     \
