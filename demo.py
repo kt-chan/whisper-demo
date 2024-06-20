@@ -13,20 +13,32 @@ hostname = "172.16.108.226"
 port = 22
 
 # sample config
-# 1. transcribe ./voice/_7_7_7138666916734895261_1_73.wav
-# 2. train
+# 1. --transcribe ./voice/_7_7_7138666916734895261_1_73.wav
+# 2. --train
 
-print('argument list: ', sys.argv)
-action_cmd = ""
-audio_file = ""
+def main():
+    # Check if the correct number of arguments is provided
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print("Usage: python script.py [--transcribe filepath|--train]")
+        sys.exit(1)  # Exit with an error message
 
-# Check the length of sys.argv
-arg_length = len(sys.argv) - 1
-if arg_length == 1:
-    action_cmd = sys.argv[1].lower()
-elif arg_length == 2:
-    action_cmd = sys.argv[1].lower()
-    audio_file = sys.argv[2]
+    # The first argument is the script name, so we look at sys.argv[1] for the actual argument
+    command = sys.argv[1]
+
+    # Check the command and print accordingly
+    if command == "--transcribe" and len(sys.argv) == 3:
+        # Check if there is a filepath provided after the --decode flag
+        filepath = sys.argv[2]
+        pprint.pp("transcribing audio file: " + str(filepath))
+        threading.Thread(target=running, args=(command, sys.argv[2])).start()
+    elif command == "--train" and len(sys.argv) == 2:
+        pprint.pp("fine-tuning whisper, and this would take long time ...")
+        threading.Thread(target=running, args=(command, )).start()
+    else:
+        print("Usage: python script.py [--transcribe filepath|--train]")
+        sys.exit(1)  # Exit with an error message
+
+    progress()
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -63,7 +75,7 @@ def progress():
         sys.exit()
 
 
-def running():
+def running(action_cmd, *args):
     try:
         # client = paramiko.SSHClient()
         # client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -102,12 +114,11 @@ def running():
         # 执行命令，和传统方法一样 ssh
         stdin, stdout, stderr = ssh.exec_command(r'cd ~/demo/ && chmod +x ./decode.sh')
         stdin, stdout, stderr = ssh.exec_command(r'cd ~/demo/ && chmod +x ./finetune.sh')
-        exec_cmd = ""
-        if action_cmd == "transcribe":
-            pprint.pp("generation text from this audio file: " + audio_file)
+        exec_cmd = None
+        if action_cmd == "--transcribe":
+            audio_file = str(args[0])
             exec_cmd = r'./decode.sh ' + audio_file + r'" '
-        elif action_cmd == "train":
-            pprint.pp("fine tunning whisper model")
+        elif action_cmd == "--train":
             exec_cmd = r'./finetune.sh'+ r'" '
 
         stdin, stdout, stderr = ssh.exec_command(
@@ -130,6 +141,6 @@ def running():
         raise
 
 
-thread1 = threading.Thread(target=running)
-thread1.start()
-progress()
+if __name__ == "__main__":
+    print('argument list: ', sys.argv)
+    main()

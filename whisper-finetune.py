@@ -17,8 +17,9 @@ from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 device = "npu:0"
 torch_dtype = torch.float16
 
-from datasets import load_dataset, DatasetDict
+print('argument list: ', sys.argv)
 
+from datasets import load_dataset, DatasetDict
 os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 current_dir = os.path.dirname(os.path.realpath(__file__))
 data_dir = "/root/demo/data/"
@@ -40,15 +41,16 @@ from transformers import WhisperFeatureExtractor, WhisperTokenizer, WhisperProce
 
 feature_extractor = WhisperFeatureExtractor.from_pretrained(model_id)
 tokenizer = WhisperTokenizer.from_pretrained(model_id, language="Cantonese", task="transcribe")
-input_str = common_voice["train"][0]["sentence"]
-labels = tokenizer(input_str).input_ids
-decoded_with_special = tokenizer.decode(labels, skip_special_tokens=False)
-decoded_str = tokenizer.decode(labels, skip_special_tokens=True)
+# input_str = common_voice["train"][0]["sentence"]
+# labels = tokenizer(input_str).input_ids
+# decoded_with_special = tokenizer.decode(labels, skip_special_tokens=False)
+# decoded_str = tokenizer.decode(labels, skip_special_tokens=True)
 
 # this is not required yet, just for inference usage
 # 为了简化使用，我们可以将特征提取器和分词器 包进 到一个 WhisperProcessor 类，
 # 该类继承自 WhisperFeatureExtractor 及 WhisperTokenizer，可根据需要用于音频处理和模型预测。
-processor = WhisperProcessor.from_pretrained(model_id, language="Cantonese", task="transcribe")
+processor = WhisperProcessor.from_pretrained(model_id, language="Cantonese", task="transcribe", skip_special_tokens=True)
+processor.tokenizer.skip_special_tokens = True
 # print(common_voice["train"][0])
 
 # 我们将使用 dataset 的 cast_column 方法将输入音频转换至所需的采样率。
@@ -73,11 +75,11 @@ def prepare_dataset(batch):
     batch["labels"] = tokenizer(batch["sentence"]).input_ids
     return batch
 
-
+# @DEBUG
 # Sample test with first 100 records
 # remove these two lines for official training
-common_voice = {split: dataset.take(100) for split, dataset in common_voice.items()}
-common_voice = DatasetDict(common_voice)
+# common_voice = {split: dataset.take(100) for split, dataset in common_voice.items()}
+# common_voice = DatasetDict(common_voice)
 
 print('Running long task on converting dataset ... ')
 common_voice = common_voice.map(prepare_dataset, remove_columns=common_voice.column_names["train"], num_proc=64)
@@ -155,6 +157,7 @@ def compute_metrics(pred):
 # Define the Training Arguments
 from transformers import Seq2SeqTrainingArguments
 
+## this would roughly run 40 epoch for training data size of 2000
 training_args = Seq2SeqTrainingArguments(
     output_dir="./"+model_name+"-yue",  # change to a repo name of your choice
     per_device_train_batch_size=4,

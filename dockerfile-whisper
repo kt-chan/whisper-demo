@@ -49,5 +49,9 @@ RUN conda run -n whisper pip install -r /root/demo/requirements.txt
 ADD set_env.sh /root/demo/
 RUN chmod u+x /root/demo/set_env.sh
 
+# Install libsndfile and pysoundfile to resolve the soundfile compatability issue
+RUN apt-get update && apt-get install -y libsndfile1
+RUN conda install -c conda-forge  -n whisper -y pysoundfile
+
 # Specify the command to run on container start
 CMD ["tail", "-f", "/dev/null"]
