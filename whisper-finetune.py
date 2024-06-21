@@ -1,12 +1,3 @@
-#在微调 Whisper 模型时，我们会用到几个流行的 Python 包。我们使用 datasets 来下载和准备训练数据，使用 transformers 来加载和训练 Whisper 模型。另外，我们还需要 soundfile 包来预处理音频文件，evaluate 和 jiwer 来评估模型的性能。最后，我们用 gradio 来为微调后的模型构建一个亮闪闪的演示应用。
-# !pip install datasets>=2.6.1
-# !pip install git+https://github.com/huggingface/transformers
-# !pip install librosa
-# !pip install evaluate>=0.30
-# !pip install jiwer
-# !pip install gradio
-
-#使用 🤗 Datasets 来下载和准备数据非常简单。仅需一行代码即可完成 Common Voice 数据集的下载和准备工作。由于印地语数据非常匮乏，我们把 训练集 和 验证集合并成约 8 小时的训练数据，而测试则基于 4 小时的 测试集:
 import os, sys, time
 import pprint
 import pickle
@@ -17,7 +8,7 @@ from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from datasets import load_dataset, DatasetDict, Audio
-from transformers import WhisperFeatureExtractor, WhisperTokenizer, WhisperProcessor
+from transformers import WhisperFeatureExtractor, WhisperTokenizer, WhisperProcessor, Seq2SeqTrainer
 
 print('argument list: ', sys.argv)
 
@@ -27,6 +18,7 @@ torch_dtype = torch.float16
 os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 current_dir = os.path.dirname(os.path.realpath(__file__))
 cache_file_path = r'/root/demo/.cache.serialized_data_cache.zip'
+model_output_dir = r"/mnt/remote/models/whisper/whisper-large-v3"
 data_dir = "/root/demo/data/"
 model_name = 'whisper-large-v3'
 model_id = "/mnt/remote/models/whisper/whisper-large-v3/"
@@ -73,11 +65,7 @@ def prepare_dataset(batch):
     batch["labels"] = tokenizer(batch["sentence"]).input_ids
     return batch
 
-# @DEBUG
-# Sample test with first 100 records
-# remove these two lines for official training
-# common_voice = {split: dataset.take(10) for split, dataset in common_voice.items()}
-# common_voice = DatasetDict(common_voice)
+
 
 # check cache to avoid repeated etl
 # Check if the file exists
@@ -97,7 +85,12 @@ else:
         print(f"The data has been serialized, zipped, and saved to {cache_file_path}")
 
 
-
+# @DEBUG
+# Sample test with first 100 records
+# remove these two lines for official training
+# print("!!!Debugging, sampling 100 data points only. Remove this for production case!!!")
+# common_voice = {split: dataset.take(100) for split, dataset in common_voice.items()}
+# common_voice = DatasetDict(common_voice)
 
 # Load a Pre-Trained Checkpoint
 from transformers import WhisperForConditionalGeneration
@@ -151,10 +144,9 @@ data_collator = DataCollatorSpeechSeq2SeqWithPadding(
 
 metric = evaluate.load("wer")
 
-
 def compute_metrics(pred):
     # Get the current datetime
-    print("compute_metrics ...")
+    print("\ncompute_metrics ...")
     print("Current timestamp:", datetime.now(beijing_timezone).strftime("%Y-%m-%d %H:%M:%S"))
 
     pred_ids = pred.predictions
@@ -164,8 +156,16 @@ def compute_metrics(pred):
     label_ids[label_ids == -100] = tokenizer.pad_token_id
 
     # we do not want to group tokens when computing the metrics
+    print("\nrunning: tokenizer.batch_decode(pred_ids, skip_special_tokens=True)...")
+    print("Current timestamp:", datetime.now(beijing_timezone).strftime("%Y-%m-%d %H:%M:%S"))
     pred_str = tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+
+    print("\nrunning: label_str = tokenizer.batch_decode(label_ids, skip_special_tokens=True)...")
+    print("Current timestamp:", datetime.now(beijing_timezone).strftime("%Y-%m-%d %H:%M:%S"))
     label_str = tokenizer.batch_decode(label_ids, skip_special_tokens=True)
+
+    print("\nrunning: wer = 100 * metric.compute(predictions=pred_str, references=label_str)...")
+    print("Current timestamp:", datetime.now(beijing_timezone).strftime("%Y-%m-%d %H:%M:%S"))
     wer = 100 * metric.compute(predictions=pred_str, references=label_str)
     return {"wer": wer}
 
@@ -174,21 +174,44 @@ def compute_metrics(pred):
 from transformers import Seq2SeqTrainingArguments
 
 ## this would roughly run 40 epoch for training data size of 2000
+# training_args = Seq2SeqTrainingArguments(
+#     output_dir=model_output_dir+"-yue",  # change to a repo name of your choice
+#     per_device_train_batch_size=4,
+#     gradient_accumulation_steps=4,  # increase by 2x for every 2x decrease in batch size
+#     learning_rate=1e-5,
+#     warmup_steps=500,
+#     max_steps=5000,
+#     gradient_checkpointing=True,
+#     fp16=True,
+#     evaluation_strategy="steps",
+#     per_device_eval_batch_size=2,
+#     predict_with_generate=True,
+#     generation_max_length=225,
+#     save_steps=1000,
+#     eval_steps=1000,
+#     logging_steps=16,
+#     report_to=["tensorboard"],
+#     logging_dir="./logs",
+#     load_best_model_at_end=True,
+#     metric_for_best_model="wer",
+#     greater_is_better=False,
+#     push_to_hub=False,
+# )
 training_args = Seq2SeqTrainingArguments(
-    output_dir="./"+model_name+"-yue",  # change to a repo name of your choice
+    output_dir=model_output_dir+"-yue",  # change to a repo name of your choice
     per_device_train_batch_size=4,
     gradient_accumulation_steps=4,  # increase by 2x for every 2x decrease in batch size
     learning_rate=1e-5,
-    warmup_steps=500,
-    max_steps=5000,
+    warmup_steps=16,
+    max_steps=1024,
     gradient_checkpointing=True,
     fp16=True,
     evaluation_strategy="steps",
     per_device_eval_batch_size=2,
     predict_with_generate=True,
     generation_max_length=225,
-    save_steps=1000,
-    eval_steps=1000,
+    save_steps=64,
+    eval_steps=64,
     logging_steps=16,
     report_to=["tensorboard"],
     logging_dir="./logs",
@@ -199,9 +222,6 @@ training_args = Seq2SeqTrainingArguments(
 )
 
 
-
-from transformers import Seq2SeqTrainer
-
 trainer = Seq2SeqTrainer(
     args=training_args,
     model=model,
@@ -211,7 +231,6 @@ trainer = Seq2SeqTrainer(
     compute_metrics=compute_metrics,
     tokenizer=processor.feature_extractor,
 )
-
 
 
 print('Running long task on training the model  ... ')

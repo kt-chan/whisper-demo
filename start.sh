@@ -25,6 +25,6 @@ docker run -itd -u root                                                         
 -v /etc/vnpu.cfg:/etc/vnpu.cfg                                                             \
 -v /usr/local/Ascend/driver/version.info:/usr/local/Ascend/driver/version.info             \
 -v /usr/local/Ascend/driver/tools:/usr/local/Ascend/driver/tools                           \
--v /mnt/remote/models/whisper/whisper-large-v3:/mnt/remote/models/whisper/whisper-large-v3 \
+-v /mnt/remote/models/whisper/:/mnt/remote/models/whisper                                  \
 -v /root/demo:/root/demo								                                   \
 whisper /bin/bash
